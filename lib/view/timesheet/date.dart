@@ -13,11 +13,11 @@ class TimesheetPage extends StatefulWidget {
   final String item;
   final int id;
 
-  const TimesheetPage(
-      {super.key,
-      required this.item,
-      required this.id,
-   });
+  const TimesheetPage({
+    super.key,
+    required this.item,
+    required this.id,
+  });
 
   @override
   _TimesheetPageState createState() => _TimesheetPageState();
@@ -129,12 +129,11 @@ class _TimesheetPageState extends State<TimesheetPage> {
             child: InkWell(
               onTap: () {
                 _selectedDateForGo = _selectedDate;
-                Get.to(AttendancePage(
-                
-                  item: widget.item,
-                  id: widget.id,
-                  selectedDateForGo: _selectedDateForGo,
-                ));
+                Get.to(() => AttendancePage(
+                      item: widget.item,
+                      id: widget.id,
+                      selectedDateForGo: _selectedDateForGo,
+                    ));
               },
               child: Container(
                 width: MediaQuery.of(context).size.width * 0.5,

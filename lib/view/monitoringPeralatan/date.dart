@@ -114,10 +114,10 @@ class _DatePeralatanState extends State<DatePeralatan> {
                       onTap: () {
                         _selectedDateForGo = _selectedDate;
 
-                        Get.to(FromDataPeralatan(
-                          item: widget.item,
-                          selectedDateForGo: _selectedDateForGo,
-                        ));
+                        Get.to(() => FromDataPeralatan(
+                              item: widget.item,
+                              selectedDateForGo: _selectedDateForGo,
+                            ));
                       },
                       text: 'Add',
                       lebar: 0.5)
@@ -132,51 +132,46 @@ class _DatePeralatanState extends State<DatePeralatan> {
 
   TableCalendar<dynamic> calender(String formattedDate) {
     return TableCalendar(
-                          shouldFillViewport: true,
-                          firstDay: DateTime(2023, 1, 1),
-                          lastDay: DateTime(2030, 12, 31),
-                          focusedDay: _selectedDate ?? DateTime.now(),
-                          selectedDayPredicate: (selectedDay) {
-                            return isSameDay(selectedDay, _selectedDate);
-                          },
-                          headerStyle: HeaderStyle(
-                            titleTextStyle: const TextStyle(fontSize: 12),
-                            decoration: const BoxDecoration(
-                              color: Color.fromARGB(255, 231, 228, 228),
-                            ),
-                            titleTextFormatter: (date, locale) =>
-                                formattedDate,
-                            titleCentered: true,
-                            formatButtonVisible: false,
-                          ),
-                          daysOfWeekStyle: DaysOfWeekStyle(
-                              decoration: BoxDecoration(color: white),
-                              weekdayStyle: const TextStyle(
-                                  fontWeight: FontWeight.bold),
-                              weekendStyle: const TextStyle(
-                                  fontWeight: FontWeight.bold)),
-                          calendarStyle: CalendarStyle(
-                              rowDecoration: BoxDecoration(color: white),
-                              weekendTextStyle: const TextStyle(fontSize: 10),
-                              defaultTextStyle: const TextStyle(fontSize: 10),
-                              outsideTextStyle: const TextStyle(fontSize: 10),
-                              selectedTextStyle:
-                                  TextStyle(fontSize: 10, color: white),
-                              todayTextStyle:
-                                  TextStyle(fontSize: 10, color: white),
-                              selectedDecoration: BoxDecoration(
-                                color: grey,
-                                shape: BoxShape.rectangle,
-                              ),
-                              todayDecoration: BoxDecoration(
-                                shape: BoxShape.rectangle,
-                                color: grey,
-                              )),
-                          onDaySelected: (selectedDay, focusedDay) {
-                            setState(() {
-                              _selectedDate = selectedDay;
-                            });
-                          },
-                        );
+      shouldFillViewport: true,
+      firstDay: DateTime(2023, 1, 1),
+      lastDay: DateTime(2030, 12, 31),
+      focusedDay: _selectedDate ?? DateTime.now(),
+      selectedDayPredicate: (selectedDay) {
+        return isSameDay(selectedDay, _selectedDate);
+      },
+      headerStyle: HeaderStyle(
+        titleTextStyle: const TextStyle(fontSize: 12),
+        decoration: const BoxDecoration(
+          color: Color.fromARGB(255, 231, 228, 228),
+        ),
+        titleTextFormatter: (date, locale) => formattedDate,
+        titleCentered: true,
+        formatButtonVisible: false,
+      ),
+      daysOfWeekStyle: DaysOfWeekStyle(
+          decoration: BoxDecoration(color: white),
+          weekdayStyle: const TextStyle(fontWeight: FontWeight.bold),
+          weekendStyle: const TextStyle(fontWeight: FontWeight.bold)),
+      calendarStyle: CalendarStyle(
+          rowDecoration: BoxDecoration(color: white),
+          weekendTextStyle: const TextStyle(fontSize: 10),
+          defaultTextStyle: const TextStyle(fontSize: 10),
+          outsideTextStyle: const TextStyle(fontSize: 10),
+          selectedTextStyle: TextStyle(fontSize: 10, color: white),
+          todayTextStyle: TextStyle(fontSize: 10, color: white),
+          selectedDecoration: BoxDecoration(
+            color: grey,
+            shape: BoxShape.rectangle,
+          ),
+          todayDecoration: BoxDecoration(
+            shape: BoxShape.rectangle,
+            color: grey,
+          )),
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          _selectedDate = selectedDay;
+        });
+      },
+    );
   }
 }

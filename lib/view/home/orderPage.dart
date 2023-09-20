@@ -5,24 +5,17 @@ import 'package:get/get.dart';
 import 'package:hama/model/order.dart';
 
 import 'package:hama/controller/orderController.dart';
-import '../../model/login.dart';
 import 'jobPage.dart';
 import 'loginPage.dart';
 
 class OrderPage extends StatelessWidget {
   final orderController = Get.put(OrderController());
 
-  OrderPage({super.key}); 
+  OrderPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final token =  HiveService.getToken();
-    if  (token == null) {
-      
-      return const LoginPage(); 
-    } 
-    else {
-        double screenHeight = MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(context).size.height;
     double doble = screenHeight * 0.13;
 
     return Scaffold(
@@ -106,8 +99,6 @@ class OrderPage extends StatelessWidget {
         ),
       ),
     );
-    }
-   
   }
 }
 
@@ -174,10 +165,10 @@ void showOrderDialog(BuildContext context, OrderController controller) {
 Widget ListOrder(String item, int id, BuildContext context) {
   return InkWell(
     onTap: () {
-      Get.to(JobPage(
-        item: item,
-        id: id,
-      ));
+      Get.to(() => JobPage(
+            item: item,
+            id: id,
+          ));
     },
     child: Container(
       height: 45,

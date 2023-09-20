@@ -24,7 +24,11 @@ class OrderController extends GetxController {
     fetchOrders();
   }
 
-
+  @override
+  void onReady() {
+    super.onReady();
+    fetchOrders();
+  }
 
   Options options = Options(
     headers: {
@@ -61,7 +65,7 @@ class OrderController extends GetxController {
     } catch (error) {
       debugPrint('Kesalahan: $error');
     } finally {
-      isLoading.value = false; 
+      isLoading.value = false;
     }
   }
 
@@ -80,9 +84,7 @@ class OrderController extends GetxController {
       }
     } catch (error) {
       debugPrint('Kesalahan: $error');
-    } finally {
-     
-    }
+    } finally {}
   }
 
   void filterOrders() {

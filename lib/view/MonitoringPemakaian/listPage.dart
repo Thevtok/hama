@@ -22,7 +22,7 @@ class ListPemakaianPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pemakaianController =
-        Get.put(PemakaianController(order: item, tanggal: ''));
+        Get.put(PemakaianController(order: item));
     return Scaffold(
       body: Column(
         children: [
@@ -83,7 +83,7 @@ class ListPemakaianPage extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: InkWell(
                           onTap: () async {
-                            Get.to(ListDataPemakaian(
+                            Get.to(()=>ListDataPemakaian(
                                 item: item, selectedDateForGo: daily.tanggal));
                           },
                           child: Container(

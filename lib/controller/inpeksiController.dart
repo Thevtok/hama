@@ -1,6 +1,5 @@
 // ignore_for_file: file_names, library_prefixes
 
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -16,13 +15,14 @@ class InpeksiController extends GetxController {
   final Dio.Dio _dio = Dio.Dio();
   final String order;
 
-  InpeksiController({required this.order, });
+  InpeksiController({
+    required this.order,
+  });
 
   @override
   void onInit() {
     super.onInit();
     fetchInpeksi(order);
-
   }
 
   var inpeksi = <Inpeksi>[].obs;
@@ -45,8 +45,8 @@ class InpeksiController extends GetxController {
   void setAuthToken(String token) {
     options = Dio.Options(
       headers: {
-        'Authorization': token, 
-        'Content-Type': 'application/json', 
+        'Authorization': token,
+        'Content-Type': 'application/json',
       },
     );
   }
@@ -79,7 +79,6 @@ class InpeksiController extends GetxController {
     }
   }
 
-
   Future<bool> addInpeksi(Inpeksi inpeksi, String order, File buktiFoto) async {
     try {
       isLoading.value = true;
@@ -90,13 +89,12 @@ class InpeksiController extends GetxController {
         'name': inpeksi.name,
         'no_order': inpeksi.noOrder,
         'lokasi': inpeksi.lokasi,
-      
         'tanggal': inpeksi.tanggal,
         'bukti_foto': await Dio.MultipartFile.fromFile(
           buktiFoto.path,
         ),
         'keterangan': inpeksi.keterangan,
-        'Rekomendasi':inpeksi.rekomendasi
+        'rekomendasi': inpeksi.rekomendasi
       });
 
       final response = await _dio.post(

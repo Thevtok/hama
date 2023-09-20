@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, must_be_immutable
+// ignore_for_file: file_names, must_be_immutable, unused_local_variable
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,12 +16,15 @@ class ListDataPemakaian extends StatelessWidget {
     super.key,
     required this.selectedDateForGo,
     required this.item,
-  });
+  }){
+ final pemakaianController =
+        Get.put(PemakaianDateController(order: item, tanggal: selectedDateForGo));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final pemakaianController =
-        Get.put(PemakaianController(order: item, tanggal: selectedDateForGo));
+     final pemakaianController =
+        Get.find<PemakaianDateController>();
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -85,7 +88,7 @@ class ListDataPemakaian extends StatelessWidget {
                               Expanded(
                                 child: Container(
                                   height:
-                                      MediaQuery.of(context).size.height * 0.38,
+                                      MediaQuery.of(context).size.height * 0.44,
                                   decoration:
                                       BoxDecoration(border: Border.all()),
                                   child: Column(

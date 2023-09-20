@@ -8,7 +8,6 @@ import '../home/loginPage.dart';
 import 'package:intl/intl.dart';
 
 import '../home/jobPage.dart';
-import '../home/orderPage.dart';
 import '../monitoringPeralatan/fromData.dart';
 
 class FromDataMonitoringPemakaian extends StatefulWidget {
@@ -32,8 +31,7 @@ class _FromDataMonitoringPemakaianState
     String formattedDate = DateFormat('MMMM dd, yyyy')
         .format(widget.selectedDateForGo ?? DateTime.now());
 
-    final pemakaianController =
-        Get.put(PemakaianController(order: widget.item, tanggal: ''));
+    final pemakaianController = Get.find<PemakaianController>();
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -78,7 +76,7 @@ class _FromDataMonitoringPemakaianState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
-                height: MediaQuery.of(context).size.height * 0.4,
+                height: MediaQuery.of(context).size.height * 0.45,
                 decoration: BoxDecoration(border: Border.all()),
                 child: Column(
                   children: [
@@ -204,7 +202,7 @@ class _FromDataMonitoringPemakaianState
                         content: Text('Data berhasil ditambahkan!'),
                       ),
                     );
-                    Get.off(OrderPage());
+                    await pemakaianController.fetchPemakaians(widget.item);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

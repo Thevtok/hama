@@ -91,7 +91,7 @@ class ListDataInspeksi extends StatelessWidget {
                               Expanded(
                                 child: Container(
                                   height:
-                                      MediaQuery.of(context).size.height * 0.35,
+                                      MediaQuery.of(context).size.height * 0.4,
                                   decoration:
                                       BoxDecoration(border: Border.all()),
                                   child: Column(

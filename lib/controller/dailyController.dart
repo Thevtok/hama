@@ -14,18 +14,19 @@ import 'apiUrl.dart';
 class DailynController extends GetxController {
   final Dio.Dio _dio = Dio.Dio();
   final String order;
-  final String tanggal;
-  DailynController({required this.order, required this.tanggal});
+
+  DailynController({
+    required this.order,
+  });
 
   @override
   void onInit() {
     super.onInit();
     fetchDaily(order);
-    fetchDailyDate(order, tanggal);
   }
 
   var dailys = <Daily>[].obs;
-  var dailyDate = <Daily>[].obs;
+
   final namaController = TextEditingController();
   final lokasiController = TextEditingController();
   final jenisController = TextEditingController();
@@ -78,35 +79,6 @@ class DailynController extends GetxController {
     }
   }
 
-  Future<void> fetchDailyDate(String order, String date) async {
-    try {
-      isLoading.value = true;
-      final token = await HiveService.getToken();
-      setAuthToken(token!);
-      final response =
-          await _dio.get('${ApiUrls.getDaily}/$order/$date', options: options);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-
-        final List<Daily> newDaily =
-            data.map((json) => Daily.fromJson(json)).toList();
-
-        dailyDate.value = newDaily;
-      } else if (response.statusCode == 404) {
-        // Jika status adalah 404, set dailyDate menjadi list kosong
-        dailyDate.value = [];
-        debugPrint('Tidak ada data daily ditemukan');
-      } else {
-        debugPrint('Gagal mengambil data daily: ${response.statusCode}');
-      }
-    } catch (error) {
-      debugPrint('Kesalahan: $error');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   Future<bool> addDaily(Daily daily, String order, File buktiFoto) async {
     try {
       isLoading.value = true;
@@ -143,6 +115,66 @@ class DailynController extends GetxController {
     } catch (error) {
       debugPrint('Kesalahan: $error');
       return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+}
+
+class DailyDateController extends GetxController {
+  final Dio.Dio _dio = Dio.Dio();
+  final String order;
+  final String tanggal;
+  DailyDateController({required this.order, required this.tanggal});
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    fetchDailyDate(order, tanggal);
+  }
+
+  var dailyDate = <Daily>[].obs;
+  RxBool isLoading = false.obs;
+
+  Dio.Options options = Dio.Options(
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  );
+  void setAuthToken(String token) {
+    options = Dio.Options(
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+    );
+  }
+
+  Future<void> fetchDailyDate(String order, String date) async {
+    try {
+      isLoading.value = true;
+      final token = await HiveService.getToken();
+      setAuthToken(token!);
+      final response =
+          await _dio.get('${ApiUrls.getDaily}/$order/$date', options: options);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+
+        final List<Daily> newDaily =
+            data.map((json) => Daily.fromJson(json)).toList();
+
+        dailyDate.value = newDaily;
+      } else if (response.statusCode == 404) {
+        // Jika status adalah 404, set dailyDate menjadi list kosong
+        dailyDate.value = [];
+        debugPrint('Tidak ada data daily ditemukan');
+      } else {
+        debugPrint('Gagal mengambil data daily: ${response.statusCode}');
+      }
+    } catch (error) {
+      debugPrint('Kesalahan: $error');
     } finally {
       isLoading.value = false;
     }

@@ -63,42 +63,42 @@ class FromPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListFrom('Timesheet', context, () {
-              Get.to(TimesheetPage(
-                item: item,
-                id: id,
-              ));
+              Get.to(() => TimesheetPage(
+                    item: item,
+                    id: id,
+                  ));
             }),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListFrom('Monitoring Peralatan', context, () {
-              Get.to(ListMonitorPeralatan(
-                item: item,
-              ));
+              Get.to(() => ListMonitorPeralatan(
+                    item: item,
+                  ));
             }),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListFrom('Daily Activity', context, () {
-              Get.to(ListDailyActivity(item: item));
+              Get.to(() => ListDailyActivity(item: item));
             }),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListFrom('Perhitungan Populasi Hama', context, () {
-              Get.to(ListIndex(item: item));
+              Get.to(() => ListIndex(item: item));
             }),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListFrom('Inpeksi Akses Hama', context, () {
-              Get.to(ListDataInspeksi(item: item));
+              Get.to(() => ListDataInspeksi(item: item));
             }),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListFrom('Monitoring Pemakaian', context, () {
-              Get.to(ListPemakaianPage(item: item));
+              Get.to(() => ListPemakaianPage(item: item));
             }),
           ),
         ],

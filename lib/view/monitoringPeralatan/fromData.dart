@@ -3,11 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../home/orderPage.dart';
+import '../../controller/peralatanController.dart';
 import 'package:hama/model/peralatan.dart';
 import 'package:intl/intl.dart';
 
-import 'package:hama/controller/peralatanController.dart';
 import '../home/jobPage.dart';
 import '../home/loginPage.dart';
 
@@ -27,11 +26,10 @@ class FromDataPeralatan extends StatefulWidget {
 class _FromDataPeralatanState extends State<FromDataPeralatan> {
   @override
   Widget build(BuildContext context) {
+    final peralatanController = Get.find<PeralatanController>();
     String formattedDate = DateFormat('MMMM dd, yyyy')
         .format(widget.selectedDateForGo ?? DateTime.now());
 
-    final peralatanController =
-        Get.put(PeralatanController(order: widget.item, tanggal: ''));
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -163,7 +161,7 @@ class _FromDataPeralatanState extends State<FromDataPeralatan> {
                         content: Text('Data berhasil ditambahkan!'),
                       ),
                     );
-                    Get.off(OrderPage());
+                    await peralatanController.fetchPeralatans(widget.item);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

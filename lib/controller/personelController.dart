@@ -17,14 +17,13 @@ class PersonelController extends GetxController {
 
   PersonelController({required this.order, required this.tanggal});
 
-   @override
+  @override
   void onInit() {
     super.onInit();
     getPersonels(order);
     getAbsen(order, tanggal);
   }
 
- 
   bool tambahPersonel = false;
   RxBool isLoading = false.obs;
 
@@ -120,7 +119,6 @@ class PersonelController extends GetxController {
             data.map((json) => Absen.fromJson(json)).toList();
 
         absens.assignAll(newAbsens);
-      
       } else {
         debugPrint('Gagal mengambil data personel: ${response.statusCode}');
       }
@@ -163,7 +161,7 @@ class PersonelController extends GetxController {
       final response = await _dio
           .delete('${ApiUrls.deletePersonel}/$order/$name', options: options);
 
-      if (response.statusCode == 204) {
+      if (response.statusCode == 200) {
         return true;
       } else {
         debugPrint('Gagal menghapus personel: ${response.statusCode}');
@@ -175,16 +173,22 @@ class PersonelController extends GetxController {
     }
   }
 
-  Future<bool> updatePersonel(
-      String order, String name, Personel updatedPersonel) async {
+  Future<bool> updatePersonel(String order, String name, String nama) async {
     try {
       final token = await HiveService.getToken();
       setAuthToken(token!);
-      final response = await _dio.put('${ApiUrls.updatePersonel}/$order/$name',
-          options: options, data: updatedPersonel.toJson());
+      final Map<String, dynamic> data = {
+        "newData": {"name": nama}
+      };
+
+      final response = await _dio.put(
+        '${ApiUrls.updatePersonel}/$order/$name',
+        options: options,
+        data: data,
+      );
 
       if (response.statusCode == 200) {
-        return true; // Berhasil memperbarui personel
+        return true;
       } else {
         debugPrint('Gagal memperbarui personel: ${response.statusCode}');
         return false;

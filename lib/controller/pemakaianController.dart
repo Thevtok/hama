@@ -11,21 +11,22 @@ import 'apiUrl.dart';
 class PemakaianController extends GetxController {
   final Dio _dio = Dio();
   final String order;
-  final String tanggal;
-  PemakaianController({required this.order, required this.tanggal});
+
+  PemakaianController({
+    required this.order,
+  });
 
   @override
   void onInit() {
     super.onInit();
     fetchPemakaians(order);
-    fetchPemakaiansDate(order, tanggal);
   }
 
   var pemakaians = <Pemakaian>[].obs;
-  var pemakaianDate = <Pemakaian>[].obs;
+
   final namaController = TextEditingController();
   final bahanController = TextEditingController();
-   final merkController = TextEditingController();
+  final merkController = TextEditingController();
   final stokAwalController = TextEditingController();
   final satuanController = TextEditingController();
   final insController = TextEditingController();
@@ -77,6 +78,57 @@ class PemakaianController extends GetxController {
     }
   }
 
+  Future<bool> addPemakaian(Pemakaian pemakaian, String order) async {
+    try {
+      final token = await HiveService.getToken();
+      setAuthToken(token!);
+      final response = await _dio.post('${ApiUrls.addPemakaian}/$order',
+          options: options, data: pemakaian.toJson());
+
+      if (response.statusCode == 201) {
+        final addedPeralatan = Pemakaian.fromJson(response.data);
+        pemakaians.add(addedPeralatan);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      return false;
+    }
+  }
+}
+
+class PemakaianDateController extends GetxController {
+  final Dio _dio = Dio();
+  final String order;
+  final String tanggal;
+  PemakaianDateController({required this.order, required this.tanggal});
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    fetchPemakaiansDate(order, tanggal);
+  }
+
+  var pemakaianDate = <Pemakaian>[].obs;
+
+  RxBool isLoading = false.obs;
+
+  Options options = Options(
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  );
+  void setAuthToken(String token) {
+    options = Options(
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+    );
+  }
+
   Future<void> fetchPemakaiansDate(String order, String date) async {
     try {
       isLoading.value = true;
@@ -102,25 +154,6 @@ class PemakaianController extends GetxController {
       debugPrint('Kesalahan: $error');
     } finally {
       isLoading.value = false;
-    }
-  }
-
-  Future<bool> addPemakaian(Pemakaian pemakaian, String order) async {
-    try {
-      final token = await HiveService.getToken();
-      setAuthToken(token!);
-      final response = await _dio.post('${ApiUrls.addPemakaian}/$order',
-          options: options, data: pemakaian.toJson());
-
-      if (response.statusCode == 201) {
-        final addedPeralatan = Pemakaian.fromJson(response.data);
-        pemakaians.add(addedPeralatan);
-        return true;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      return false;
     }
   }
 }

@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, must_be_immutable
+// ignore_for_file: file_names, must_be_immutable, unused_local_variable
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,17 +7,22 @@ import '../home/jobPage.dart';
 import '../home/loginPage.dart';
 
 class ListDataPeralatan extends StatelessWidget {
-  String selectedDateForGo;
+  final String selectedDateForGo;
   final String item;
 
-  ListDataPeralatan(
-      {super.key, required this.selectedDateForGo, required this.item, });
-
-  
-
+  ListDataPeralatan({
+    Key? key,
+    required this.selectedDateForGo,
+    required this.item,
+  }) : super(key: key) {
+    final peralatanController =
+        Get.put(PeralatanDateController(order: item, tanggal: selectedDateForGo));
+   
+  }
   @override
   Widget build(BuildContext context) {
-    final peralatanController = Get.put(PeralatanController(order: item,tanggal: selectedDateForGo));
+    final peralatanController = Get.find<PeralatanDateController>();
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -81,7 +86,7 @@ class ListDataPeralatan extends StatelessWidget {
                               Expanded(
                                 child: Container(
                                   height:
-                                      MediaQuery.of(context).size.height * 0.25,
+                                      MediaQuery.of(context).size.height * 0.3,
                                   decoration:
                                       BoxDecoration(border: Border.all()),
                                   child: Column(
@@ -125,7 +130,6 @@ class ListDataPeralatan extends StatelessWidget {
                                       const SizedBox(
                                         height: 5,
                                       ),
-                                     
                                       ListDataRow(
                                           labelText: 'Kondisi',
                                           value: peralatan.kondisi),

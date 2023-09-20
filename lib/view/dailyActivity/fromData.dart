@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../home/loginPage.dart';
-import '../home/orderPage.dart';
 import 'package:hama/model/daily.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -34,8 +33,7 @@ class _FromDataDailyActivityState extends State<FromDataDailyActivity> {
 
   @override
   Widget build(BuildContext context) {
-    final dailyController =
-        Get.put(DailynController(order: widget.item, tanggal: ''));
+    final dailyController = Get.find<DailynController>();
     String formattedDate = DateFormat('MMMM dd, yyyy')
         .format(widget.selectedDateForGo ?? DateTime.now());
     return Scaffold(
@@ -79,7 +77,7 @@ class _FromDataDailyActivityState extends State<FromDataDailyActivity> {
             const SizedBox(
               height: 20,
             ),
-            tombolDaily(dailyController, context),
+            tombolDaily(dailyController, context, widget.item),
             const SizedBox(
               height: 10,
             ),
@@ -132,7 +130,7 @@ class _FromDataDailyActivityState extends State<FromDataDailyActivity> {
   }
 
   AddButton tombolDaily(
-      DailynController dailyController, BuildContext context) {
+      DailynController dailyController, BuildContext context, String order) {
     return AddButton(
         onTap: () async {
           if (_selectedImage != null) {
@@ -174,7 +172,7 @@ class _FromDataDailyActivityState extends State<FromDataDailyActivity> {
                   content: Text('Data berhasil ditambahkan!'),
                 ),
               );
-              Get.off(OrderPage());
+              await dailyController.fetchDaily(order);
             }
           }
         },

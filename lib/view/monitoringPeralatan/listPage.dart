@@ -1,9 +1,9 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable, invalid_use_of_protected_member
+// ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable, invalid_use_of_protected_member, unused_local_variable
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hama/controller/peralatanController.dart';
+import '../../controller/peralatanController.dart';
 import '../../view/monitoringPeralatan/listData.dart';
 
 import '../home/jobPage.dart';
@@ -16,14 +16,16 @@ class ListMonitorPeralatan extends StatelessWidget {
   ListMonitorPeralatan({
     Key? key,
     required this.item,
-  }) : super(key: key);
+  }) : super(key: key) {
+    final controller = Get.put(PeralatanController(order: item));
+  }
 
   Set<String> tanggalSet = <String>{};
 
   @override
   Widget build(BuildContext context) {
-    final peralatanController =
-        Get.put(PeralatanController(tanggal: '', order: item));
+    final peralatanController = Get.find<PeralatanController>();
+
     return Scaffold(
       body: Column(
         children: [
@@ -52,7 +54,7 @@ class ListMonitorPeralatan extends StatelessWidget {
           ),
           AddButton(
               onTap: () {
-                Get.to(DatePeralatan(item: item));
+                Get.to(() => DatePeralatan(item: item));
               },
               text: 'Tambah Form',
               lebar: 0.5),
@@ -85,12 +87,10 @@ class ListMonitorPeralatan extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: InkWell(
                         onTap: () async {
-                          
-                          Get.to(ListDataPeralatan(
-                            item: item,
-                            selectedDateForGo: peralatan.tanggal,
-                            
-                          ));
+                          Get.to(() => ListDataPeralatan(
+                                item: item,
+                                selectedDateForGo: peralatan.tanggal,
+                              ));
                         },
                         child: Container(
                           decoration:

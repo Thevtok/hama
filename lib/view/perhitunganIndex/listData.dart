@@ -21,7 +21,7 @@ class ListDataIndex extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final indexController =
-        Get.put(IndexController(order: item, tanggal: selectedDateForGo));
+        Get.put(IndexDateController(order: item, tanggal: selectedDateForGo));
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -85,7 +85,7 @@ class ListDataIndex extends StatelessWidget {
                               Expanded(
                                 child: Container(
                                   height:
-                                      MediaQuery.of(context).size.height * 0.33,
+                                      MediaQuery.of(context).size.height * 0.4,
                                   decoration:
                                       BoxDecoration(border: Border.all()),
                                   child: Column(

@@ -1,17 +1,17 @@
 class Personel {
-  final int id;
-  final String name;
+  final int? id;
+  final String? name;
 
-  final String noOrder;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String? noOrder;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   Personel({
-    required this.id,
-    required this.name,
-    required this.noOrder,
-    required this.createdAt,
-    required this.updatedAt,
+     this.id,
+     this.name,
+     this.noOrder,
+     this.createdAt,
+     this.updatedAt,
   });
 
   factory Personel.fromJson(Map<String, dynamic> json) {

@@ -116,7 +116,7 @@ Padding backLogout(BuildContext context) {
         const Spacer(),
         InkWell(
           onTap: () {
-            Get.off(const LoginPage());
+            Get.offAll(const LoginPage());
           },
           child: Container(
             width: MediaQuery.of(context).size.width * 0.2,

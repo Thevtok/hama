@@ -8,7 +8,6 @@ import '../../controller/indexController.dart';
 
 import '../home/jobPage.dart';
 import '../home/loginPage.dart';
-import '../home/orderPage.dart';
 import '../monitoringPeralatan/fromData.dart';
 import 'listData.dart';
 
@@ -29,8 +28,7 @@ class _ListIndexState extends State<ListIndex> {
 
   @override
   Widget build(BuildContext context) {
-    final indexController =
-        Get.put(IndexController(tanggal: '', order: widget.item));
+    final indexController = Get.put(IndexController(order: widget.item));
     return Scaffold(
       body: Column(
         children: [
@@ -92,10 +90,10 @@ class _ListIndexState extends State<ListIndex> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: InkWell(
                         onTap: () async {
-                          Get.to(ListDataIndex(
-                            item: widget.item,
-                            selectedDateForGo: indexx.tanggal,
-                          ));
+                          Get.to(() => ListDataIndex(
+                                item: widget.item,
+                                selectedDateForGo: indexx.tanggal,
+                              ));
                         },
                         child: Container(
                           decoration:
@@ -222,7 +220,7 @@ void showMyDialog(
                           content: Text('Data berhasil ditambahkan!'),
                         ),
                       );
-                      Get.off(OrderPage());
+                      await controller.fetchIndexs(item);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

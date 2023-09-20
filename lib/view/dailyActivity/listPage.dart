@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable, invalid_use_of_protected_member
+// ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable, invalid_use_of_protected_member, unused_local_variable
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
@@ -16,13 +16,18 @@ class ListDailyActivity extends StatelessWidget {
   ListDailyActivity({
     Key? key,
     required this.item,
-  }) : super(key: key);
+  }) : super(key: key) {
+    final dailyController = Get.put(DailynController(
+      order: item,
+    ));
+  }
 
   Set<String> tanggalSet = <String>{};
 
   @override
   Widget build(BuildContext context) {
-    final dailyController = Get.put(DailynController(order: item, tanggal: ''));
+    final dailyController = Get.find<DailynController>();
+
     return Scaffold(
       body: Column(
         children: [
@@ -51,7 +56,7 @@ class ListDailyActivity extends StatelessWidget {
           ),
           AddButton(
               onTap: () {
-                Get.to(DateDailyActivity(item: item));
+                Get.to(() => DateDailyActivity(item: item));
               },
               text: 'Tambah Form',
               lebar: 0.5),
@@ -83,7 +88,7 @@ class ListDailyActivity extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: InkWell(
                           onTap: () async {
-                            Get.to(ListDataDaily(
+                            Get.to(() => ListDataDaily(
                                 item: item, selectedDateForGo: daily.tanggal!));
                           },
                           child: Container(

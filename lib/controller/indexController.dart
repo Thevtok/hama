@@ -11,18 +11,19 @@ import 'apiUrl.dart';
 class IndexController extends GetxController {
   final Dio _dio = Dio();
   final String order;
-  final String tanggal;
-  IndexController({required this.order, required this.tanggal});
+
+  IndexController({
+    required this.order,
+  });
 
   @override
   void onInit() {
     super.onInit();
     fetchIndexs(order);
-    fetchIndexsDate(order, tanggal);
   }
 
   var indexs = <PerhitunganIndex>[].obs;
-  var indexDate = <PerhitunganIndex>[].obs;
+
   final namaController = TextEditingController();
   final lokasiController = TextEditingController();
   final tanggalController = TextEditingController();
@@ -75,6 +76,57 @@ class IndexController extends GetxController {
     }
   }
 
+  Future<bool> addIndex(PerhitunganIndex index, String order) async {
+    try {
+      final token = await HiveService.getToken();
+      setAuthToken(token!);
+      final response = await _dio.post('${ApiUrls.addIndex}/$order',
+          options: options, data: index.toJson());
+
+      if (response.statusCode == 201) {
+        final addedPeralatan = PerhitunganIndex.fromJson(response.data);
+        indexs.add(addedPeralatan);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      return false;
+    }
+  }
+}
+
+class IndexDateController extends GetxController {
+  final Dio _dio = Dio();
+  final String order;
+  final String tanggal;
+  IndexDateController({required this.order, required this.tanggal});
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    fetchIndexsDate(order, tanggal);
+  }
+
+  var indexDate = <PerhitunganIndex>[].obs;
+
+  RxBool isLoading = false.obs;
+
+  Options options = Options(
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  );
+  void setAuthToken(String token) {
+    options = Options(
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+    );
+  }
+
   Future<void> fetchIndexsDate(String order, String date) async {
     try {
       isLoading.value = true;
@@ -100,25 +152,6 @@ class IndexController extends GetxController {
       debugPrint('Kesalahan: $error');
     } finally {
       isLoading.value = false;
-    }
-  }
-
-  Future<bool> addIndex(PerhitunganIndex index, String order) async {
-    try {
-      final token = await HiveService.getToken();
-      setAuthToken(token!);
-      final response = await _dio.post('${ApiUrls.addIndex}/$order',
-          options: options, data: index.toJson());
-
-      if (response.statusCode == 201) {
-        final addedPeralatan = PerhitunganIndex.fromJson(response.data);
-        indexs.add(addedPeralatan);
-        return true;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      return false;
     }
   }
 }

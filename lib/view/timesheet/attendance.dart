@@ -5,10 +5,7 @@ import 'package:get/get.dart';
 import 'package:hama/controller/personelController.dart';
 import '../home/jobPage.dart';
 import '../home/loginPage.dart';
-import '../home/orderPage.dart';
 import 'package:intl/intl.dart';
-
-
 
 class AttendancePage extends StatefulWidget {
   DateTime? selectedDateForGo;
@@ -100,7 +97,7 @@ class _AttendancePageState extends State<AttendancePage> {
                     return Column(
                       children: [
                         Text(
-                          personel.name,
+                          personel.name ?? '',
                           style: const TextStyle(fontSize: 15),
                         ),
                         Align(
@@ -252,7 +249,7 @@ class _AttendancePageState extends State<AttendancePage> {
 
                 if (keterangan.isNotEmpty) {
                   bool berhasil = await personelController.absen(
-                    personel.name,
+                    personel.name ?? '',
                     tanggal,
                     keterangan,
                     order,
@@ -271,7 +268,6 @@ class _AttendancePageState extends State<AttendancePage> {
                       ),
                     );
                   }
-                  Get.off(OrderPage());
                 }
               }
             },

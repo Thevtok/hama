@@ -10,21 +10,19 @@ import 'jobPage.dart';
 import 'loginPage.dart';
 
 class PersonelPage extends StatelessWidget {
-
   final String item;
   final int id;
- 
 
-  const PersonelPage(
-      {Key? key,
-      required this.item,
-      required this.id,
-      })
-      : super(key: key);
+  const PersonelPage({
+    Key? key,
+    required this.item,
+    required this.id,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-      final personelController = Get.put(PersonelController(order: item,tanggal: ''));
+    final personelController =
+        Get.put(PersonelController(order: item, tanggal: ''));
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -70,6 +68,8 @@ class PersonelPage extends StatelessWidget {
                 } else {
                   return Personnel(
                     personelData: personelController.personels.value,
+                    order: item,
+                    controller: personelController,
                   );
                 }
               },
@@ -143,11 +143,15 @@ void showPersonelDialog(
 
 class Personnel extends StatelessWidget {
   final List<Personel> personelData;
+  final PersonelController controller;
+  final String order;
 
   const Personnel({
-    super.key,
+    Key? key,
     required this.personelData,
-  });
+    required this.controller,
+    required this.order,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +174,7 @@ class Personnel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Text(
-                  person.name,
+                  person.name ?? '',
                   style: TextStyle(
                     color: grey,
                     fontWeight: FontWeight.w500,
@@ -180,12 +184,76 @@ class Personnel extends StatelessWidget {
             ),
             IconButton(
               padding: const EdgeInsets.all(0),
-              onPressed: () {},
+              onPressed: () {
+                // Tampilkan dialog edit dengan TextField
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    TextEditingController textEditingController =
+                        TextEditingController(text: person.name);
+
+                    return AlertDialog(
+                      title: const Text('Edit Item'),
+                      content: TextField(
+                        controller: textEditingController,
+                        decoration: const InputDecoration(labelText: 'Nama'),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Batal'),
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Tutup dialog
+                          },
+                        ),
+                        TextButton(
+                          child: const Text('Simpan'),
+                          onPressed: () async {
+                            String newName = textEditingController.text;
+                            await controller.updatePersonel(
+                                order, person.name ?? '', newName);
+                            textEditingController.clear();
+                            await controller.getPersonels(order);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
               icon: const Icon(Icons.edit),
             ),
             IconButton(
               padding: const EdgeInsets.all(0),
-              onPressed: () {},
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Konfirmasi Hapus'),
+                      content: Text(
+                          'Apakah Anda yakin ingin menghapus ${person.name}?'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Batal'),
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Tutup dialog
+                          },
+                        ),
+                        TextButton(
+                          child: const Text('Hapus'),
+                          onPressed: () async {
+                            await controller.deletePersonel(
+                                person.name ?? '', order);
+                            await controller.getPersonels(order);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
               icon: const Icon(Icons.delete),
             ),
           ],
