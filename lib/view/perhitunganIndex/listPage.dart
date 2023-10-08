@@ -1,9 +1,13 @@
 // ignore_for_file: file_names, must_be_immutable, unused_local_variable, unused_field, use_build_context_synchronously
 
+import 'dart:convert';
+
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hama/model/index.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../controller/indexController.dart';
 
 import '../home/jobPage.dart';
@@ -29,6 +33,7 @@ class _ListIndexState extends State<ListIndex> {
   @override
   Widget build(BuildContext context) {
     final indexController = Get.put(IndexController(order: widget.item));
+
     return Scaffold(
       body: Column(
         children: [
@@ -121,6 +126,28 @@ void showMyDialog(
   IndexController controller,
   String item,
 ) {
+  Future<bool> checkInternetConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult != ConnectivityResult.none;
+  }
+
+  Future<List<PerhitunganIndex>> fetchLocalData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? dataStrings = prefs.getStringList('index_list$item');
+
+    if (dataStrings != null) {
+      // Mengonversi List<String> JSON kembali menjadi List<PerhitunganIndex>
+      List<PerhitunganIndex> data = dataStrings.map((dataString) {
+        Map<String, dynamic> jsonMap = jsonDecode(dataString);
+        return PerhitunganIndex.fromJson(jsonMap);
+      }).toList();
+
+      return data;
+    } else {
+      return [];
+    }
+  }
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -190,43 +217,85 @@ void showMyDialog(
               ),
               AddButton(
                   onTap: () async {
-                    String jumlahText = controller.jumlahController.text;
-                    String indexText = controller.indexController.text;
-                    int jumlah = int.tryParse(jumlahText) ?? 0;
-                    int indexx = int.tryParse(indexText) ?? 0;
+                    final isConnected = await checkInternetConnection();
+                    if (isConnected) {
+                      String jumlahText = controller.jumlahController.text;
+                      String indexText = controller.indexController.text;
+                      int jumlah = int.tryParse(jumlahText) ?? 0;
+                      int indexx = int.tryParse(indexText) ?? 0;
 
-                    bool berhasil = await controller.addIndex(
-                        PerhitunganIndex(
-                            name: controller.namaController.text,
-                            noOrder: item,
-                            lokasi: controller.lokasiController.text,
-                            jenisHama: controller.jenisController.text,
-                            indeksPopulasi: indexx,
-                            jumlah: jumlah,
-                            tanggal: controller.tanggalController.text,
-                            status: controller.statusController.text),
-                        item);
-                    controller.namaController.clear();
-                    controller.lokasiController.clear();
-                    controller.jenisController.clear();
-                    controller.indexController.clear();
-                    controller.jumlahController.clear();
-                    controller.tanggalController.clear();
-                    controller.statusController.clear();
+                      bool berhasil = await controller.addIndex(
+                          PerhitunganIndex(
+                              name: controller.namaController.text,
+                              noOrder: item,
+                              lokasi: controller.lokasiController.text,
+                              jenisHama: controller.jenisController.text,
+                              indeksPopulasi: indexx,
+                              jumlah: jumlah,
+                              tanggal: controller.tanggalController.text,
+                              status: controller.statusController.text),
+                          item);
+                      controller.namaController.clear();
+                      controller.lokasiController.clear();
+                      controller.jenisController.clear();
+                      controller.indexController.clear();
+                      controller.jumlahController.clear();
+                      controller.tanggalController.clear();
+                      controller.statusController.clear();
 
-                    if (berhasil) {
+                      if (berhasil) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Data berhasil ditambahkan!'),
+                          ),
+                        );
+                        await controller.fetchIndexs(item);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Data gagal ditambahkan!'),
+                          ),
+                        );
+                      }
+                    } else {
+                      String jumlahText = controller.jumlahController.text;
+                      String indexText = controller.indexController.text;
+                      int jumlah = int.tryParse(jumlahText) ?? 0;
+                      int indexx = int.tryParse(indexText) ?? 0;
+                      PerhitunganIndex perhitunganIndex = PerhitunganIndex(
+                          name: controller.namaController.text,
+                          noOrder: item,
+                          lokasi: controller.lokasiController.text,
+                          jenisHama: controller.jenisController.text,
+                          indeksPopulasi: indexx,
+                          jumlah: jumlah,
+                          tanggal: controller.tanggalController.text,
+                          status: controller.statusController.text);
+                      List<PerhitunganIndex> existingData =
+                          await fetchLocalData();
+                      existingData.add(perhitunganIndex);
+                      List<Map<String, dynamic>> dataList = existingData
+                          .map((peralatan) => peralatan.toJson())
+                          .toList();
+
+                      // Menginisialisasi SharedPreferences
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.setStringList('index_list$item',
+                          dataList.map((data) => jsonEncode(data)).toList());
+                      controller.namaController.clear();
+                      controller.lokasiController.clear();
+                      controller.jenisController.clear();
+                      controller.indexController.clear();
+                      controller.jumlahController.clear();
+                      controller.tanggalController.clear();
+                      controller.statusController.clear();
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Data berhasil ditambahkan!'),
+                          content: Text('Data berhasil disimpan secara lokal!'),
                         ),
                       );
                       await controller.fetchIndexs(item);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Data gagal ditambahkan!'),
-                        ),
-                      );
                     }
                   },
                   text: 'Add',

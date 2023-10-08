@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 class Inpeksi {
   final String? name;
   final String? noOrder;
@@ -5,6 +8,7 @@ class Inpeksi {
 
   final String? tanggal;
   dynamic buktiFoto;
+  final String? buktiFotoPath;
   final String? keterangan;
   final String? rekomendasi;
 
@@ -15,6 +19,7 @@ class Inpeksi {
     this.rekomendasi,
     this.tanggal,
     this.buktiFoto,
+    this.buktiFotoPath,
     this.keterangan,
   });
 
@@ -26,8 +31,21 @@ class Inpeksi {
       rekomendasi: json['rekomendasi'],
       tanggal: json['tanggal'],
       buktiFoto: json['bukti_foto'],
+      buktiFotoPath: json['bukti_foto_path'],
       keterangan: json['keterangan'],
     );
+  }
+  static String imageToBase64(String imagePath) {
+    List<int> imageBytes = File(imagePath).readAsBytesSync();
+    String base64Image = base64Encode(imageBytes);
+    return base64Image;
+  }
+
+  static File base64ToImage(String base64Image, String imagePath) {
+    List<int> imageBytes = base64Decode(base64Image);
+    File imageFile = File(imagePath);
+    imageFile.writeAsBytesSync(imageBytes);
+    return imageFile;
   }
 
   Map<String, dynamic> toJson() {
@@ -38,6 +56,8 @@ class Inpeksi {
       'rekomendasi': rekomendasi,
       'tanggal': tanggal,
       'keterangan': keterangan,
+      'bukti_foto_path': buktiFotoPath,
+      'bukti_foto': buktiFoto,
     };
   }
 }

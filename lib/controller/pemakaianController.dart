@@ -1,9 +1,14 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, avoid_print
 
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hama/model/pemakaian.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/login.dart';
 import 'apiUrl.dart';
@@ -20,6 +25,9 @@ class PemakaianController extends GetxController {
   void onInit() {
     super.onInit();
     fetchPemakaians(order);
+    Timer.periodic(const Duration(minutes: 1), (Timer timer) {
+      monitorConnection();
+    });
   }
 
   var pemakaians = <Pemakaian>[].obs;
@@ -48,6 +56,67 @@ class PemakaianController extends GetxController {
         'Content-Type': 'application/json',
       },
     );
+  }
+
+  Future<bool> sendLocalDataToServer() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String>? peralatanListJson =
+          prefs.getStringList('pemakaian_list$order');
+
+      if (peralatanListJson != null && peralatanListJson.isNotEmpty) {
+        // Mengonversi List<String> JSON menjadi List<Map<String, dynamic>>
+        List<Map<String, dynamic>> dataList = peralatanListJson
+            .map((dataString) => jsonDecode(dataString))
+            .cast<Map<String, dynamic>>()
+            .toList();
+
+        // Kirim seluruh list peralatan ke server menggunakan metode addPeralatans atau metode yang sesuai dalam controller Anda
+        bool berhasil = await sendListToServer(dataList);
+
+        if (berhasil) {
+          // Hapus seluruh data dari SharedPreferences jika berhasil terkirim
+          prefs.remove('pemakaian_list$order');
+          return true;
+        }
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+    return false;
+  }
+
+  Future<bool> sendListToServer(List<Map<String, dynamic>> dataList) async {
+    try {
+      // Contoh pengiriman data ke server
+      for (var data in dataList) {
+        Pemakaian peralatan = Pemakaian.fromJson(data);
+        bool berhasil = await addPemakaian(peralatan, order);
+        if (!berhasil) {
+          // Handle kesalahan jika gagal mengirimkan data tertentu
+          return false;
+        }
+      }
+      return true;
+    } catch (e) {
+      print('Error: $e');
+      return false;
+    }
+  }
+
+  Future<void> monitorConnection() async {
+    final ConnectivityResult result = await Connectivity().checkConnectivity();
+    if (result == ConnectivityResult.mobile ||
+        result == ConnectivityResult.wifi) {
+      bool dataTerkirim = await sendLocalDataToServer();
+      if (dataTerkirim) {
+        Get.snackbar(
+          'Sukses',
+          'Data lokal peralatan berhasil dikirim ke server!',
+          snackPosition: SnackPosition.BOTTOM, // Atur posisi snack bar
+        );
+      }
+    }
   }
 
   Future<void> fetchPemakaians(String order) async {

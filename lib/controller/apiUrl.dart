@@ -1,7 +1,7 @@
 // ignore_for_file: file_names
 
 class ApiUrls {
-  static const String baseUrl = 'https://eb06-125-164-19-202.ngrok.io';
+  static const String baseUrl = 'https://fc3b-125-164-18-207.ngrok.io';
   static const String loginUrl = '$baseUrl/api/login';
   // order
   static const String getOrder = '$baseUrl/api/order/getall';

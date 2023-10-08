@@ -1,8 +1,13 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable, use_build_context_synchronously
+// ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable, use_build_context_synchronously, unrelated_type_equality_checks
 // ignore_for_file: file_names
 
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../controller/peralatanController.dart';
 import 'package:hama/model/peralatan.dart';
 import 'package:intl/intl.dart';
@@ -24,11 +29,119 @@ class FromDataPeralatan extends StatefulWidget {
 }
 
 class _FromDataPeralatanState extends State<FromDataPeralatan> {
+  Future<bool> checkInternetConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult != ConnectivityResult.none;
+  }
+
   @override
   Widget build(BuildContext context) {
     final peralatanController = Get.find<PeralatanController>();
     String formattedDate = DateFormat('MMMM dd, yyyy')
         .format(widget.selectedDateForGo ?? DateTime.now());
+
+    Future<List<MonitoringPeralatan>> fetchLocalData() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String>? dataStrings =
+          prefs.getStringList('peralatan_list${widget.item}');
+
+      if (dataStrings != null) {
+        // Mengonversi List<String> JSON kembali menjadi List<MonitoringPeralatan>
+        List<MonitoringPeralatan> data = dataStrings.map((dataString) {
+          Map<String, dynamic> jsonMap = jsonDecode(dataString);
+          return MonitoringPeralatan.fromJson(jsonMap);
+        }).toList();
+
+        return data;
+      } else {
+        return [];
+      }
+    }
+
+    void handleSaveButtonTap() async {
+      final isConnected = await checkInternetConnection();
+      if (isConnected) {
+        String jumlahText = peralatanController.jumlahController.text;
+        int jumlah = int.tryParse(jumlahText) ?? 0;
+        String urlFormat = DateFormat('yyyy-MM-dd')
+            .format(widget.selectedDateForGo ?? DateTime.now());
+        bool berhasil = await peralatanController.addPeralatans(
+            MonitoringPeralatan(
+                name: peralatanController.namaController.text,
+                noOrder: widget.item,
+                merek: peralatanController.merkController.text,
+                jumlah: jumlah,
+                satuan: peralatanController.satuanController.text,
+                kondisi: peralatanController.kondisiController.text,
+                tanggal: urlFormat),
+            widget.item);
+
+        peralatanController.namaController.clear();
+        peralatanController.merkController.clear();
+        peralatanController.jumlahController.clear();
+        peralatanController.satuanController.clear();
+        peralatanController.kondisiController.clear();
+
+        if (berhasil) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Data berhasil ditambahkan!'),
+            ),
+          );
+          await peralatanController.fetchPeralatans(widget.item);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Data gagal ditambahkan!'),
+            ),
+          );
+        }
+      } else {
+        String jumlahText = peralatanController.jumlahController.text;
+        int jumlah = int.tryParse(jumlahText) ?? 0;
+        String urlFormat = DateFormat('yyyy-MM-dd')
+            .format(widget.selectedDateForGo ?? DateTime.now());
+
+        // Membuat objek MonitoringPeralatan
+        MonitoringPeralatan peralatan = MonitoringPeralatan(
+          name: peralatanController.namaController.text,
+          noOrder: widget.item,
+          merek: peralatanController.merkController.text,
+          jumlah: jumlah,
+          satuan: peralatanController.satuanController.text,
+          kondisi: peralatanController.kondisiController.text,
+          tanggal: urlFormat,
+        );
+        List<MonitoringPeralatan> existingData = await fetchLocalData();
+        // Menambahkan objek baru ke dalam list
+        existingData.add(peralatan);
+        List<Map<String, dynamic>> dataList =
+            existingData.map((peralatan) => peralatan.toJson()).toList();
+
+        // Menginisialisasi SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+
+        // Konversi objek peralatan menjadi JSON (String)
+        // Simpan data ke SharedPreferences dengan kunci tertentu
+        await prefs.setStringList('peralatan_list${widget.item}',
+            dataList.map((data) => jsonEncode(data)).toList());
+
+        // Membersihkan inputan
+        peralatanController.namaController.clear();
+        peralatanController.merkController.clear();
+        peralatanController.jumlahController.clear();
+        peralatanController.satuanController.clear();
+        peralatanController.kondisiController.clear();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data berhasil disimpan secara lokal!'),
+          ),
+        );
+
+        await peralatanController.fetchPeralatans(widget.item);
+      }
+    }
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -133,45 +246,10 @@ class _FromDataPeralatanState extends State<FromDataPeralatan> {
               height: 20,
             ),
             AddButton(
-                onTap: () async {
-                  String jumlahText = peralatanController.jumlahController.text;
-                  int jumlah = int.tryParse(jumlahText) ?? 0;
-                  String urlFormat = DateFormat('yyyy-MM-dd')
-                      .format(widget.selectedDateForGo ?? DateTime.now());
-                  bool berhasil = await peralatanController.addPeralatans(
-                      MonitoringPeralatan(
-                          name: peralatanController.namaController.text,
-                          noOrder: widget.item,
-                          merek: peralatanController.merkController.text,
-                          jumlah: jumlah,
-                          satuan: peralatanController.satuanController.text,
-                          kondisi: peralatanController.kondisiController.text,
-                          tanggal: urlFormat),
-                      widget.item);
-
-                  peralatanController.namaController.clear();
-                  peralatanController.merkController.clear();
-                  peralatanController.jumlahController.clear();
-                  peralatanController.satuanController.clear();
-                  peralatanController.kondisiController.clear();
-
-                  if (berhasil) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Data berhasil ditambahkan!'),
-                      ),
-                    );
-                    await peralatanController.fetchPeralatans(widget.item);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Data gagal ditambahkan!'),
-                      ),
-                    );
-                  }
-                },
-                text: 'Save',
-                lebar: 0.5)
+              onTap: handleSaveButtonTap,
+              text: 'Save',
+              lebar: 0.5,
+            )
           ],
         ),
       ),

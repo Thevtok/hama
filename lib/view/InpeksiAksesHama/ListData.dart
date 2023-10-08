@@ -1,11 +1,14 @@
-// ignore_for_file: file_names, must_be_immutable, library_private_types_in_public_api, use_build_context_synchronously
+// ignore_for_file: file_names, must_be_immutable, library_private_types_in_public_api, use_build_context_synchronously, avoid_print
 
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hama/controller/inpeksiController.dart';
 import 'package:hama/model/inpeksi.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../dailyActivity/fromData.dart';
 import '../dailyActivity/listData.dart';
@@ -189,6 +192,29 @@ class _InpeksiDialogState extends State<InpeksiDialog> {
     });
   }
 
+  Future<bool> checkInternetConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult != ConnectivityResult.none;
+  }
+
+  Future<List<Inpeksi>> fetchLocalData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? dataStrings =
+        prefs.getStringList('inspeksi_list${widget.item}');
+
+    if (dataStrings != null) {
+      // Mengonversi List<String> JSON kembali menjadi List<Daily>
+      List<Inpeksi> data = dataStrings.map((dataString) {
+        Map<String, dynamic> jsonMap = jsonDecode(dataString);
+        return Inpeksi.fromJson(jsonMap);
+      }).toList();
+
+      return data;
+    } else {
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -250,8 +276,53 @@ class _InpeksiDialogState extends State<InpeksiDialog> {
             ),
             AddButton(
                 onTap: () async {
-                  bool berhasil = await widget.controller.addInpeksi(
-                      Inpeksi(
+                  final isConnected = await checkInternetConnection();
+                  if (isConnected) {
+                    bool berhasil = await widget.controller.addInpeksi(
+                        Inpeksi(
+                          name: widget.controller.namaController.text,
+                          noOrder: widget.item,
+                          rekomendasi:
+                              widget.controller.rekomendasiController.text,
+                          lokasi: widget.controller.lokasiController.text,
+                          keterangan:
+                              widget.controller.keteranganController.text,
+                          tanggal: widget.controller.tanggalController.text,
+                        ),
+                        widget.item,
+                        _selectedImage!);
+                    widget.controller.namaController.clear();
+                    widget.controller.lokasiController.clear();
+                    widget.controller.rekomendasiController.clear();
+                    widget.controller.keteranganController.clear();
+
+                    widget.controller.tanggalController.clear();
+                    setState(() {
+                      _selectedImage = null;
+                    });
+
+                    if (berhasil) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Data berhasil ditambahkan!'),
+                        ),
+                      );
+                      await widget.controller.fetchInpeksi(widget.item);
+
+                      Navigator.of(context).pop();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Data gagal ditambahkan!'),
+                        ),
+                      );
+                    }
+                  } else {
+                    String? base64Image;
+                    if (_selectedImage != null) {
+                      base64Image = Inpeksi.imageToBase64(_selectedImage!.path);
+                    }
+                    Inpeksi inpeksi = Inpeksi(
                         name: widget.controller.namaController.text,
                         noOrder: widget.item,
                         rekomendasi:
@@ -259,29 +330,33 @@ class _InpeksiDialogState extends State<InpeksiDialog> {
                         lokasi: widget.controller.lokasiController.text,
                         keterangan: widget.controller.keteranganController.text,
                         tanggal: widget.controller.tanggalController.text,
-                      ),
-                      widget.item,
-                      _selectedImage!);
-                  widget.controller.namaController.clear();
-                  widget.controller.lokasiController.clear();
-                  widget.controller.rekomendasiController.clear();
-                  widget.controller.keteranganController.clear();
+                        buktiFoto: base64Image,
+                        buktiFotoPath: _selectedImage?.path ?? '');
+                    List<Inpeksi> existingData = await fetchLocalData();
+                    existingData.add(inpeksi);
+                    print('Data setelah ditambahkan ke list: $existingData');
+                    List<Map<String, dynamic>> dataList =
+                        existingData.map((daily) => daily.toJson()).toList();
 
-                  widget.controller.tanggalController.clear();
+                    // Menginisialisasi SharedPreferences
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    print(
+                        'Data yang akan disimpan di SharedPreferences: $dataList');
+                    await prefs.setStringList('inspeksi_list${widget.item}',
+                        dataList.map((data) => jsonEncode(data)).toList());
+                    widget.controller.namaController.clear();
+                    widget.controller.lokasiController.clear();
+                    widget.controller.rekomendasiController.clear();
+                    widget.controller.keteranganController.clear();
 
-                  if (berhasil) {
+                    widget.controller.tanggalController.clear();
+                    setState(() {
+                      _selectedImage = null;
+                    });
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Data berhasil ditambahkan!'),
-                      ),
-                    );
-                    await widget.controller.fetchInpeksi(widget.item);
-
-                    Navigator.of(context).pop();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Data gagal ditambahkan!'),
+                        content: Text('Data berhasil disimpan secara lokal!'),
                       ),
                     );
                   }
